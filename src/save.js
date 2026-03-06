@@ -2,8 +2,16 @@ import { useBlockProps } from "@wordpress/block-editor";
 
 export default function Save({ attributes }) {
   const ratio = (() => {
-    const [w, h] = attributes.aspectRatio.split(":").map(Number);
-    return w / h;
+    if (!attributes.aspectRatio) return null;
+    const parts = attributes.aspectRatio.split(":").map(Number);
+    if (
+      parts.length !== 2 ||
+      isNaN(parts[0]) ||
+      isNaN(parts[1]) ||
+      parts[1] === 0
+    )
+      return null;
+    return parts[0] / parts[1];
   })();
 
   const blockProps = useBlockProps.save();
@@ -16,7 +24,7 @@ export default function Save({ attributes }) {
           position: "relative",
           width: "100%",
           height: attributes.height + "px",
-          maxWidth: attributes.height * ratio + "px",
+          maxWidth: ratio ? attributes.height * ratio + "px" : "100%",
           margin: "0 auto",
         }}>
         <canvas

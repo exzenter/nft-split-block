@@ -4,29 +4,27 @@ import {
   PanelBody,
   RangeControl,
   ToggleControl,
-  SelectControl,
+  TextControl,
   Button,
   ColorPalette,
-  __experimentalHStack as HStack,
   BaseControl,
 } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 import { renderCanvas } from "./canvas-engine";
 
-const ASPECT_RATIOS = [
-  { label: "1:1", value: "1:1" },
-  { label: "4:3", value: "4:3" },
-  { label: "3:4", value: "3:4" },
-  { label: "16:9", value: "16:9" },
-  { label: "9:16", value: "9:16" },
-  { label: "3:2", value: "3:2" },
-  { label: "2:3", value: "2:3" },
-  { label: "21:9", value: "21:9" },
-];
+const ASPECT_RATIOS = [];
 
 function parseRatio(str) {
-  const [w, h] = str.split(":").map(Number);
-  return w / h;
+  if (!str) return null;
+  const parts = str.split(":").map(Number);
+  if (
+    parts.length !== 2 ||
+    isNaN(parts[0]) ||
+    isNaN(parts[1]) ||
+    parts[1] === 0
+  )
+    return null;
+  return parts[0] / parts[1];
 }
 
 export default function Edit({ attributes, setAttributes }) {
@@ -39,6 +37,7 @@ export default function Edit({ attributes, setAttributes }) {
   });
 
   const ratio = parseRatio(attributes.aspectRatio);
+  const hasRatio = ratio !== null;
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -87,10 +86,11 @@ export default function Edit({ attributes, setAttributes }) {
         <PanelBody
           title={__("Aspect Ratio & Size", "nft-split-block")}
           initialOpen>
-          <SelectControl
+          <TextControl
             label={__("Aspect Ratio", "nft-split-block")}
             value={attributes.aspectRatio}
-            options={ASPECT_RATIOS}
+            placeholder="e.g. 16:9"
+            help={__("Leave empty to use Height only.", "nft-split-block")}
             onChange={(v) => setAttributes({ aspectRatio: v })}
           />
           <RangeControl
@@ -100,6 +100,12 @@ export default function Edit({ attributes, setAttributes }) {
             min={100}
             max={1200}
             step={10}
+            disabled={hasRatio}
+            help={
+              hasRatio
+                ? __("Controlled by Aspect Ratio.", "nft-split-block")
+                : undefined
+            }
           />
         </PanelBody>
 
@@ -277,7 +283,7 @@ export default function Edit({ attributes, setAttributes }) {
             position: "relative",
             width: "100%",
             height: attributes.height + "px",
-            maxWidth: attributes.height * ratio + "px",
+            maxWidth: hasRatio ? attributes.height * ratio + "px" : "100%",
             margin: "0 auto",
           }}>
           <canvas

@@ -35,7 +35,7 @@
     "depthDelay": { "type": "number", "default": 0.13 },
     "easeSpeed": { "type": "number", "default": 0.06 },
     "mousePower": { "type": "number", "default": 0.75 },
-    "aspectRatio": { "type": "string", "default": "1:1" },
+    "aspectRatio": { "type": "string", "default": "" },
     "seed": { "type": "number", "default": 0 },
     "height": { "type": "number", "default": 500 }
   },
