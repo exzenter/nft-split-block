@@ -35,7 +35,8 @@
     "mousePower": { "type": "number", "default": 0.75 },
     "aspectRatio": { "type": "string", "default": "" },
     "seed": { "type": "number", "default": 0 },
-    "height": { "type": "number", "default": 500 }
+    "width": { "type": "string", "default": "500px" },
+    "height": { "type": "string", "default": "500px" }
   },
   "textdomain": "nft-split-block",
   "editorScript": "file:./index.js",

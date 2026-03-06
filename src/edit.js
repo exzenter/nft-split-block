@@ -27,7 +27,6 @@ function parseColor(str) {
   return { hex: str, alpha: 1 };
 }
 
-/** Build "rgba(r,g,b,a)" from hex + alpha */
 function buildColor(hex, alpha) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -76,12 +75,10 @@ function ColorControl({ label, value, onChange }) {
 function parseRatio(str) {
   if (!str || !str.trim()) return null;
   const s = str.trim();
-  // plain number e.g. "1" or "1.5" or "0.75"
   if (/^[\d.]+$/.test(s)) {
     const v = parseFloat(s);
     return isNaN(v) || v <= 0 ? null : v;
   }
-  // "w:h" format e.g. "16:9"
   const parts = s.split(":").map(Number);
   if (
     parts.length !== 2 ||
@@ -98,9 +95,7 @@ export default function Edit({ attributes, setAttributes }) {
   const animRef = useRef(null);
   const stateRef = useRef({ mouseProgress: 0, targetProgress: 0, tree: null });
 
-  const blockProps = useBlockProps({
-    style: { position: "relative" },
-  });
+  const blockProps = useBlockProps({ style: { position: "relative" } });
 
   const ratio = parseRatio(attributes.aspectRatio);
   const hasRatio = ratio !== null;
@@ -127,17 +122,14 @@ export default function Edit({ attributes, setAttributes }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const w = rect.width,
-      h = rect.height;
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
-    const cx = w / 2,
-      cy = h / 2;
-    const maxDist = Math.max(w, h) / 2;
+    const cx = rect.width / 2,
+      cy = rect.height / 2;
+    const maxDist = Math.max(rect.width, rect.height) / 2;
     const dist = Math.sqrt((mx - cx) ** 2 + (my - cy) ** 2);
-    const normalized = 1 - Math.min(dist / maxDist, 1);
     stateRef.current.targetProgress = Math.pow(
-      normalized,
+      1 - Math.min(dist / maxDist, 1),
       attributes.mousePower,
     );
   };
@@ -146,32 +138,60 @@ export default function Edit({ attributes, setAttributes }) {
     stateRef.current.targetProgress = 0;
   };
 
+  // Wrapper style: when ratio is set, use padding-top trick so height is
+  // always derived from width — no fixed height needed.
+  const wrapStyle = hasRatio
+    ? {
+        position: "relative",
+        width: attributes.width || "500px",
+        maxWidth: "100%",
+        height: 0,
+        paddingTop: `calc((${attributes.width || "500px"}) / ${ratio})`,
+        margin: "0 auto",
+      }
+    : {
+        position: "relative",
+        width: attributes.width || "500px",
+        maxWidth: "100%",
+        height: attributes.height || "500px",
+        margin: "0 auto",
+      };
+
   return (
     <>
       <InspectorControls>
-        <PanelBody
-          title={__("Aspect Ratio & Size", "nft-split-block")}
-          initialOpen>
+        <PanelBody title={__("Size", "nft-split-block")} initialOpen>
+          <TextControl
+            label={__("Width", "nft-split-block")}
+            value={attributes.width}
+            placeholder="500px"
+            help={__("Any CSS unit: px, %, vw, rem…", "nft-split-block")}
+            onChange={(v) => setAttributes({ width: v })}
+          />
           <TextControl
             label={__("Aspect Ratio", "nft-split-block")}
             value={attributes.aspectRatio}
-            placeholder="e.g. 16:9"
-            help={__("Leave empty to use Height only.", "nft-split-block")}
+            placeholder="e.g. 16:9 or 1"
+            help={__(
+              "Sets height from width. Leave empty to use Height.",
+              "nft-split-block",
+            )}
             onChange={(v) => setAttributes({ aspectRatio: v })}
           />
-          <RangeControl
-            label={__("Height (px)", "nft-split-block")}
+          <TextControl
+            label={__("Height", "nft-split-block")}
             value={attributes.height}
-            onChange={(v) => setAttributes({ height: v })}
-            min={100}
-            max={1200}
-            step={10}
-            disabled={hasRatio}
+            placeholder="500px"
             help={
               hasRatio
-                ? __("Controlled by Aspect Ratio.", "nft-split-block")
-                : undefined
+                ? __(
+                    "Disabled — controlled by Aspect Ratio.",
+                    "nft-split-block",
+                  )
+                : __("Any CSS unit: px, %, vh, rem…", "nft-split-block")
             }
+            onChange={(v) => setAttributes({ height: v })}
+            disabled={hasRatio}
           />
         </PanelBody>
 
@@ -326,17 +346,13 @@ export default function Edit({ attributes, setAttributes }) {
       </InspectorControls>
 
       <div {...blockProps}>
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: attributes.height + "px",
-            maxWidth: hasRatio ? attributes.height * ratio + "px" : "100%",
-            margin: "0 auto",
-          }}>
+        <div style={wrapStyle}>
           <canvas
             ref={canvasRef}
             style={{
+              position: hasRatio ? "absolute" : "relative",
+              top: 0,
+              left: 0,
               width: "100%",
               height: "100%",
               cursor: "crosshair",
