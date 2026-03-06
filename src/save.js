@@ -2,8 +2,13 @@ import { useBlockProps } from "@wordpress/block-editor";
 
 export default function Save({ attributes }) {
   const ratio = (() => {
-    if (!attributes.aspectRatio) return null;
-    const parts = attributes.aspectRatio.split(":").map(Number);
+    if (!attributes.aspectRatio || !attributes.aspectRatio.trim()) return null;
+    const s = attributes.aspectRatio.trim();
+    if (/^[\d.]+$/.test(s)) {
+      const v = parseFloat(s);
+      return isNaN(v) || v <= 0 ? null : v;
+    }
+    const parts = s.split(":").map(Number);
     if (
       parts.length !== 2 ||
       isNaN(parts[0]) ||

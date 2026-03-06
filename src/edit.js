@@ -74,8 +74,15 @@ function ColorControl({ label, value, onChange }) {
 }
 
 function parseRatio(str) {
-  if (!str) return null;
-  const parts = str.split(":").map(Number);
+  if (!str || !str.trim()) return null;
+  const s = str.trim();
+  // plain number e.g. "1" or "1.5" or "0.75"
+  if (/^[\d.]+$/.test(s)) {
+    const v = parseFloat(s);
+    return isNaN(v) || v <= 0 ? null : v;
+  }
+  // "w:h" format e.g. "16:9"
+  const parts = s.split(":").map(Number);
   if (
     parts.length !== 2 ||
     isNaN(parts[0]) ||
