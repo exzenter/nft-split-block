@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "nft-split/canvas",
+  "version": "1.0.0",
+  "title": "NFT Split Pattern",
+  "category": "media",
+  "icon": "grid-view",
+  "description": "Interactive recursive split pattern canvas with bezier curves.",
+  "keywords": ["nft", "split", "canvas", "pattern", "generative", "art"],
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "spacing": {
+      "margin": true,
+      "padding": true
+    }
+  },
+  "attributes": {
+    "bgColor": { "type": "string", "default": "#c4a882" },
+    "bgInvisible": { "type": "boolean", "default": false },
+    "shapeColor": { "type": "string", "default": "#1e3a4c" },
+    "shapeInvisible": { "type": "boolean", "default": false },
+    "gap": { "type": "number", "default": 3 },
+    "maxDepth": { "type": "number", "default": 6 },
+    "padding": { "type": "number", "default": 0.06 },
+    "curveMin": { "type": "number", "default": 0.15 },
+    "curveMax": { "type": "number", "default": 0.75 },
+    "curveTight": { "type": "number", "default": 0.12 },
+    "randomCurves": { "type": "boolean", "default": true },
+    "allCornersChance": { "type": "number", "default": 0.15 },
+    "splitBias": { "type": "number", "default": 0.82 },
+    "splitMin": { "type": "number", "default": 0.25 },
+    "splitMax": { "type": "number", "default": 0.75 },
+    "depthDelay": { "type": "number", "default": 0.13 },
+    "easeSpeed": { "type": "number", "default": 0.06 },
+    "mousePower": { "type": "number", "default": 0.75 },
+    "aspectRatio": { "type": "string", "default": "1:1" },
+    "seed": { "type": "number", "default": 0 },
+    "height": { "type": "number", "default": 500 }
+  },
+  "textdomain": "nft-split-block",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css"
+}
