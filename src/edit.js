@@ -6,13 +6,72 @@ import {
   ToggleControl,
   TextControl,
   Button,
-  ColorPalette,
   BaseControl,
 } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 import { renderCanvas } from "./canvas-engine";
 
-const ASPECT_RATIOS = [];
+/** Parse "rgba(r,g,b,a)" or "#rrggbb" → { hex, alpha } */
+function parseColor(str) {
+  if (!str) return { hex: "#000000", alpha: 1 };
+  const rgba = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+  if (rgba) {
+    const r = parseInt(rgba[1]).toString(16).padStart(2, "0");
+    const g = parseInt(rgba[2]).toString(16).padStart(2, "0");
+    const b = parseInt(rgba[3]).toString(16).padStart(2, "0");
+    return {
+      hex: `#${r}${g}${b}`,
+      alpha: rgba[4] !== undefined ? parseFloat(rgba[4]) : 1,
+    };
+  }
+  return { hex: str, alpha: 1 };
+}
+
+/** Build "rgba(r,g,b,a)" from hex + alpha */
+function buildColor(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function ColorControl({ label, value, onChange }) {
+  const { hex, alpha } = parseColor(value);
+  return (
+    <BaseControl label={label}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 4,
+        }}>
+        <input
+          type="color"
+          value={hex}
+          onChange={(e) => onChange(buildColor(e.target.value, alpha))}
+          style={{
+            width: 36,
+            height: 28,
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            background: "none",
+          }}
+        />
+        <span style={{ fontSize: 11, color: "#757575" }}>{hex}</span>
+      </div>
+      <RangeControl
+        label={__("Opacity", "nft-split-block")}
+        value={Math.round(alpha * 100)}
+        onChange={(v) => onChange(buildColor(hex, v / 100))}
+        min={0}
+        max={100}
+        step={1}
+      />
+    </BaseControl>
+  );
+}
 
 function parseRatio(str) {
   if (!str) return null;
@@ -110,34 +169,16 @@ export default function Edit({ attributes, setAttributes }) {
         </PanelBody>
 
         <PanelBody title={__("Colors", "nft-split-block")} initialOpen>
-          <BaseControl label={__("Background Color", "nft-split-block")}>
-            <ToggleControl
-              label={__("Invisible (transparent)", "nft-split-block")}
-              checked={attributes.bgInvisible}
-              onChange={(v) => setAttributes({ bgInvisible: v })}
-            />
-            {!attributes.bgInvisible && (
-              <ColorPalette
-                value={attributes.bgColor}
-                onChange={(v) => setAttributes({ bgColor: v || "#c4a882" })}
-                clearable={false}
-              />
-            )}
-          </BaseControl>
-          <BaseControl label={__("Shape Color", "nft-split-block")}>
-            <ToggleControl
-              label={__("Invisible (transparent)", "nft-split-block")}
-              checked={attributes.shapeInvisible}
-              onChange={(v) => setAttributes({ shapeInvisible: v })}
-            />
-            {!attributes.shapeInvisible && (
-              <ColorPalette
-                value={attributes.shapeColor}
-                onChange={(v) => setAttributes({ shapeColor: v || "#1e3a4c" })}
-                clearable={false}
-              />
-            )}
-          </BaseControl>
+          <ColorControl
+            label={__("Background Color", "nft-split-block")}
+            value={attributes.bgColor}
+            onChange={(v) => setAttributes({ bgColor: v })}
+          />
+          <ColorControl
+            label={__("Shape Color", "nft-split-block")}
+            value={attributes.shapeColor}
+            onChange={(v) => setAttributes({ shapeColor: v })}
+          />
         </PanelBody>
 
         <PanelBody title={__("Layout", "nft-split-block")} initialOpen={false}>

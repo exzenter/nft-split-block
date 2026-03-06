@@ -17,10 +17,8 @@
     }
   },
   "attributes": {
-    "bgColor": { "type": "string", "default": "#c4a882" },
-    "bgInvisible": { "type": "boolean", "default": false },
-    "shapeColor": { "type": "string", "default": "#1e3a4c" },
-    "shapeInvisible": { "type": "boolean", "default": false },
+    "bgColor": { "type": "string", "default": "rgba(196,168,130,1)" },
+    "shapeColor": { "type": "string", "default": "rgba(30,58,76,1)" },
     "gap": { "type": "number", "default": 3 },
     "maxDepth": { "type": "number", "default": 6 },
     "padding": { "type": "number", "default": 0.06 },

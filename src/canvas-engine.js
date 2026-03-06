@@ -350,10 +350,9 @@ export function renderCanvas(canvas, attrs, state) {
     state.mouseProgress = state.targetProgress;
   }
 
-  // Clear / background
-  if (attrs.bgInvisible) {
-    ctx.clearRect(0, 0, w, h);
-  } else {
+  // Clear / background — always clear first so alpha works correctly
+  ctx.clearRect(0, 0, w, h);
+  if (attrs.bgColor) {
     ctx.fillStyle = attrs.bgColor;
     ctx.fillRect(0, 0, w, h);
   }
@@ -372,7 +371,7 @@ export function renderCanvas(canvas, attrs, state) {
     cfg,
   );
 
-  if (!attrs.shapeInvisible) {
+  if (attrs.shapeColor) {
     ctx.fillStyle = attrs.shapeColor;
     for (const r of rects) drawShape(ctx, r);
   }
